@@ -33,22 +33,22 @@ button { } /* 在组件中不能使用 */
 ```jsx
 /* CustomComp.js */
 export default CustomComp extends Component {
-    static defaultProps = {
-        className: ''
-    }
+  static defaultProps = {
+    className: ''
+  }
 
-    render() {
-        return <View className={this.props.className}>这段文本的颜色不会由组件外的 class 决定</View>
-    }
+  render () {
+    return <View className={this.props.className}>这段文本的颜色不会由组件外的 class 决定</View>
+  }
 }
 ```
 
 ```jsx
 /* MyPage.js */
 export default MyPage extends Component {
-    render() {
-        return <CustomComp className="red-text" />
-    }
+  render () {
+    return <CustomComp className="red-text" />
+  }
 }
 ```
 
@@ -64,20 +64,20 @@ export default MyPage extends Component {
 ```jsx
 /* CustomComp.js */
 export default CustomComp extends Component {
-    static externalClasses = ['my-class']
+  static externalClasses = ['my-class']
 
-    render() {
-        return <View className="my-class">这段文本的颜色由组件外的 class 决定</View>
-    }
+  render () {
+    return <View className="my-class">这段文本的颜色由组件外的 class 决定</View>
+  }
 }
 ```
 
 ```jsx
 /* MyPage.js */
 export default MyPage extends Component {
-    render() {
-        return <CustomComp my-class="red-text" />
-    }
+  render () {
+    return <CustomComp my-class="red-text" />
+  }
 }
 ```
 
@@ -97,13 +97,13 @@ export default MyPage extends Component {
 ```jsx
 /* CustomComp.js */
 export default CustomComp extends Component {
-    static options = {
-    	addGlobalClass: true
-    }
+  static options = {
+    addGlobalClass: true
+  }
 
-    render() {
-        return <View className="red-text">这段文本的颜色由组件外的 class 决定</View>
-    }
+  render () {
+    return <View className="red-text">这段文本的颜色由组件外的 class 决定</View>
+  }
 }
 ```
 

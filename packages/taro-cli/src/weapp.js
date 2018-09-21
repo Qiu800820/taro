@@ -784,6 +784,15 @@ function parseComponentExportAst (ast, componentName, componentPath, componentTy
       })
     },
 
+    CallExpression (astPath) {
+      if (astPath.get('callee').isIdentifier({ name : 'require'})) {
+        const arg = astPath.get('arguments')[0]
+        if (t.isStringLiteral(arg.node)) {
+          componentRealPath = Util.resolveScriptPath(path.resolve(path.dirname(componentPath), arg.node.value))
+        }
+      }
+    },
+
     Program: {
       exit (astPath) {
         astPath.traverse({
@@ -1334,7 +1343,7 @@ function getDepStyleList (outputFilePath, buildDepComponentsResult) {
 function buildUsingComponents (components, isComponent) {
   const usingComponents = Object.create(null)
   for (const component of components) {
-    usingComponents[component.name] = component.path
+    usingComponents[component.name] = component.path.replace(path.extname(component.path), '')
   }
   return Object.assign({}, isComponent ? { component: true } : { usingComponents: {} }, components.length ? {
     usingComponents

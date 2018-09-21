@@ -15,16 +15,16 @@ title: JSX 简介
 
 请观察以下代码：
 
-```javascript
+```jsx
 import Taro, { Component } from '@tarojs/taro'
 import { View } from '@tarojs/components'
 
 class Home extends Component {
-	render () {
-		return (
-			<View>Hello World!</View>
-		)
-	}
+  render () {
+    return (
+      <View>Hello World!</View>
+    )
+  }
 }
 ```
 
@@ -47,11 +47,11 @@ import home_page from './page'
 
 // 错误！组件名应该首字母大写:
 class App extends Component {
-	render () {
-		return (
-			<home_page message="Hello World!" />
-		)
-	}
+  render () {
+    return (
+      <home_page message="Hello World!" />
+    )
+  }
 }
 ```
 
@@ -63,11 +63,11 @@ import Taro, { Component } from '@tarojs/taro'
 import HomePage from './page'
 
 class App extends Component {
-	render () {
-		return (
-			<HomePage message="Hello World!" />
-		)
-	}
+  render () {
+    return (
+      <HomePage message="Hello World!" />
+    )
+  }
 }
 ```
 
@@ -96,15 +96,15 @@ import Taro, { Component } from '@tarojs/taro'
 
 class App extends Components {
   render () {
-    let description;
+    let description
 
     if (this.props.number % 2 == 0) {
-      description = <Text>even</Text>;
+      description = <Text>even</Text>
     } else {
-      description = <Text>odd</Text>;
+      description = <Text>odd</Text>
     }
 
-    return <View>{this.props.number} is an {description} number</View>;
+    return <View>{this.props.number} is an {description} number</View>
   }
 }
 ```
@@ -124,7 +124,7 @@ class App extends Components {
 
 如果你没有给属性传值，它默认为 true。因此下面两个 JSX 是等价的：
 
-```js
+```jsx
 <MyTextBox autocomplete />
 
 <MyTextBox autocomplete={true} />
@@ -143,31 +143,31 @@ class App extends Components {
 
 如果 JSX 标签是闭合式的，那么你需要在结尾处用 />, 就好像 XML/HTML 一样：
 
-```javascript
+```jsx
 const element = <Image src={user.avatarUrl} />;
 ```
 
 JSX 标签同样可以相互嵌套：
 
-```javascript
+```jsx
 const element = (
   <View>
     <Text>Hello!</Text>
     <Text>Good to see you here.</Text>
   </View>
-);
+)
 ```
 
 JavaScript 表达式也可以嵌套：
 
-```javascript
+```jsx
 render () {
-	  const todos = ['finish doc', 'submit pr', 'nag dan to review'];
+  const todos = ['finish doc', 'submit pr', 'nag dan to review'];
   return (
     <ul>
       {todos.map((todo) => <Text>{todo}</Text>)}
     </ul>
-  );
+  )
 }
 ```
 
@@ -175,7 +175,7 @@ render () {
 
 false、null、undefined 和 true 都是有效的 children，但它们不会直接被渲染。下面的表达式是等价的：
 
-```javascript
+```jsx
 <View />
 
 <View></View>
@@ -191,7 +191,7 @@ false、null、undefined 和 true 都是有效的 children，但它们不会直�
 
 这在根据条件来确定是否渲染 元素时非常有用。以下的JSX只会在showHeader为true时渲染<Header />组件。
 
-```javascript
+```jsx
 <View>
   {showHeader && <Header />}
   <Content />
@@ -204,7 +204,7 @@ false、null、undefined 和 true 都是有效的 children，但它们不会直�
 
 考虑如下代码：
 
-```javascript
+```jsx
 const element = <Content footer={<View />} />
 ```
 
@@ -216,41 +216,41 @@ const element = <Content footer={<View />} />
 
 考虑如下代码：
 
-```javascript
+```jsx
 // Tabs.js
 export default class Tabs extends Componenet {
-	render () {
-		return <View> {this.props.children} </View>
-	}
+  render () {
+    return <View> {this.props.children} </View>
+  }
 }
 // App.js
 import Tabset from './tabs'
 class App extends Componenet {
-	render () {
-		return (
-			<Tabset >
-		)
-	}
+  render () {
+    return (
+      <Tabset >
+    )
+  }
 }
 ```
 
 在 React/Nerv 中，你可以把组件的名称命名为任何遵循 JavaScript 规范的名字，通过 `export default` 导出时再通过 `import` 引入，又可以给他命名为一个不同的名字。但在 Taro 中你不能这么做，当转换成小程序时，自定义组件实际上会包一层 `template` 组件，而 `template` 的 `name` 属性必须是和 `class` 定义的名称一致的，否则 Taro 无法找到对应的组件：
 
-```javascript
+```jsx
 // Tabs.js
 export default class Tabs extends Componenet {
-	render () {
-		return <View> {this.props.children} </View>
-	}
+  render () {
+    return <View> {this.props.children} </View>
+  }
 }
 // App.js
 // 定义 `Tabs`，引入名称也必须是 `Tabs`
 import Tabs from './tabs'
 class App extends Componenet {
-	render () {
-		return (
-			<Tabs >
-		)
-	}
+  render () {
+    return (
+      <Tabs >
+    )
+  }
 }
 ```

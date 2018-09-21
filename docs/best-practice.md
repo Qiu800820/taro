@@ -26,7 +26,7 @@ title: 最佳实践
 
 在微信小程序端的自定义组件中，只有在 `properties` 中指定的属性，才能从父组件传入并接收
 
-```javascript
+```jsx
 Component({
   properties: {
     myProperty: { // 属性名
@@ -45,7 +45,7 @@ Component({
 
 而在 Taro 中，对于在组件代码中使用到的来自 `props` 的属性，会在编译时被识别并加入到编译后的 `properties` 中，暂时支持到了以下写法
 
-```javascript
+```jsx
 this.props.property
 
 const { property } = this.props
@@ -61,7 +61,7 @@ const property = this.props.property
 
 在 Taro 中，父组件要往子组件传递函数，属性名必须以 `on` 开头
 
-```javascript
+```jsx
 // 调用 Custom 组件，传入 handleEvent 函数，属性名为 `onTrigger`
 class Parent extends Component {
 
@@ -108,9 +108,6 @@ class Parent extends Component {
 
 不要在 `state` 与 `props` 上用同名的字段，因为这些被字段在微信小程序中都会挂在 `data` 上。
 
-不要以 `id`、`class`、`style` 作为自定义组件的属性与内部 state 的名称，因为这些属性名在微信小程序小程序中会丢失。
-
-
 ### 小程序中页面生命周期 `componentWillMount` 不一致问题
 
 由于微信小程序里页面在 `onLoad` 时才能拿到页面的路由参数，而页面onLoad前组件都已经 `attached` 了。因此页面的 `componentWillMount` 可能会与预期不太一致。例如：
@@ -154,7 +151,7 @@ render () {
 
 不要以解构的方式来获取通过 `env` 配置的 `process.env` 环境变量，请直接以完整书写的方式 `process.env.NODE_ENV` 来进行使用
 
-```javascript
+```jsx
 // 错误写法，不支持
 const { NODE_ENV = 'development' } = process.env
 if (NODE_ENV === 'development') {
@@ -173,7 +170,7 @@ if (process.env.NODE_ENV === 'development') {
 
 新增一个自行命名的 `JS` 文件，例如 `global_data.js`，示例代码如下
 
-```javascript
+```jsx
 const globalData = {}
 
 export function set (key, val) {
@@ -187,7 +184,7 @@ export function get (key) {
 
 随后就可以在任意位置进行使用啦
 
-```javascript
+```jsx
 import { set as setGlobalData, get as getGlobalData } from './path/name/global_data'
 
 setGlobalData('test', 1)

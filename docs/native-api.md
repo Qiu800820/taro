@@ -48,14 +48,14 @@ title: 端能力API
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.request({
   url: 'http://localhost:8080/test',
   data: {
-  	foo: 'foo',
-  	bar: 10
+    foo: 'foo',
+    bar: 10
   },
   header: {
     'content-type': 'application/json'
@@ -78,7 +78,7 @@ Taro.request({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const uploadTask = Taro.uploadFile(params).then(...)
@@ -90,7 +90,7 @@ const uploadTask = Taro.uploadFile(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.downloadFile(params).then(...)
@@ -125,7 +125,7 @@ Taro.downloadFile(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.connectSocket({
@@ -133,23 +133,22 @@ Taro.connectSocket({
   success: function () {
     console.log('connect success')
   }
-})
-  .then(task => {
-    task.onOpen(function () {
-      console.log('onOpen')
-      task.send({ data: 'xxx' })
-    })
-    task.onMessage(function (msg) {
-      console.log('onMessage: ', msg)
-      task.close()
-    })
-    task.onError(function () {
-      console.log('onError')
-    })
-    task.onClose(function (e) {
-      console.log('onClose: ', e)
-    })
+}).then(task => {
+  task.onOpen(function () {
+    console.log('onOpen')
+    task.send({ data: 'xxx' })
   })
+  task.onMessage(function (msg) {
+    console.log('onMessage: ', msg)
+    task.close()
+  })
+  task.onError(function () {
+    console.log('onError')
+  })
+  task.onClose(function (e) {
+    console.log('onClose: ', e)
+  })
+})
 ```
 
 #### SocketTask
@@ -281,7 +280,7 @@ SocketTask.onMessage(CALLBACK)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.chooseImage(params).then(...)
@@ -293,7 +292,7 @@ Taro.chooseImage(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.previewImage(params).then(...)
@@ -305,7 +304,7 @@ Taro.previewImage(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getImageInfo(params).then(...)
@@ -317,7 +316,7 @@ Taro.getImageInfo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.saveImageToPhotosAlbum(params).then(...)
@@ -340,7 +339,7 @@ Taro.saveImageToPhotosAlbum(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startRecord(params).then(...)
@@ -352,7 +351,7 @@ Taro.startRecord(params).then(...)
 
 ​**示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopRecord()
@@ -373,7 +372,7 @@ Taro.stopRecord()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const recorderManager = Taro.getRecorderManager()
@@ -393,7 +392,7 @@ const recorderManager = Taro.getRecorderManager()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.playVoice(params).then(...)
@@ -405,7 +404,7 @@ Taro.playVoice(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startRecord(params)
@@ -423,7 +422,7 @@ Taro.startRecord(params)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startRecord(params)
@@ -451,7 +450,7 @@ Taro.startRecord(params)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBackgroundAudioPlayerState(params).then(...)
@@ -463,7 +462,7 @@ Taro.getBackgroundAudioPlayerState(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.playBackgroundAudio(params).then(...)
@@ -475,7 +474,7 @@ Taro.playBackgroundAudio(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.pauseBackgroundAudio()
@@ -487,7 +486,7 @@ Taro.pauseBackgroundAudio()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.seekBackgroundAudio(params).then(...)
@@ -499,7 +498,7 @@ Taro.seekBackgroundAudio(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopBackgroundAudio()
@@ -538,7 +537,7 @@ Taro.stopBackgroundAudio()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const backgroundAudioManager = Taro.getBackgroundAudioManager()
@@ -558,7 +557,7 @@ const backgroundAudioManager = Taro.getBackgroundAudioManager()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const audioCtx = Taro.createAudioContext('myAudio')
@@ -570,7 +569,7 @@ const audioCtx = Taro.createAudioContext('myAudio')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const innerAudioContext = Taro.createInnerAudioContext()
@@ -591,7 +590,7 @@ const innerAudioContext = Taro.createInnerAudioContext()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.chooseVideo(params).then(...)
@@ -603,7 +602,7 @@ Taro.chooseVideo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.saveVideoToPhotosAlbum(params).then(...)
@@ -624,7 +623,7 @@ Taro.saveVideoToPhotosAlbum(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const videoContext = Taro.createVideoContext('myVideo')
@@ -644,7 +643,7 @@ const videoContext = Taro.createVideoContext('myVideo')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const cameraContext = Taro.createCameraContext()
@@ -664,7 +663,7 @@ const cameraContext = Taro.createCameraContext()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.saveFile(params).then(...)
@@ -676,7 +675,7 @@ Taro.saveFile(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getFileInfo(params).then(...)
@@ -688,7 +687,7 @@ Taro.getFileInfo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getSavedFileList(params).then(...)
@@ -700,7 +699,7 @@ Taro.getSavedFileList(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getSavedFileInfo(params).then(...)
@@ -712,7 +711,7 @@ Taro.getSavedFileInfo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.removeSavedFile(params).then(...)
@@ -724,7 +723,7 @@ Taro.removeSavedFile(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.openDocument(params).then(...)
@@ -759,7 +758,7 @@ Taro.openDocument(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setStorage({ key: 'key', data: 'value' })
@@ -779,7 +778,7 @@ Taro.setStorage({ key: 'key', data: 'value' })
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setStorageSync('key', 'value')
@@ -806,7 +805,7 @@ Taro.setStorageSync('key', 'value')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getStorage({ key: 'key' })
@@ -825,7 +824,7 @@ Taro.getStorage({ key: 'key' })
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const data = Taro.getStorageSync('key')
@@ -851,7 +850,7 @@ const data = Taro.getStorageSync('key')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getStorageInfo()
@@ -864,7 +863,7 @@ Taro.getStorageInfo()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const res = Taro.getStorageInfoSync()
@@ -886,7 +885,7 @@ console.log(res.keys)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.removeStorage({ key: 'key' })
@@ -905,7 +904,7 @@ Taro.removeStorage({ key: 'key' })
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.removeStorageSync('key')
@@ -917,7 +916,7 @@ Taro.removeStorageSync('key')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.clearStorage()
@@ -929,7 +928,7 @@ Taro.clearStorage()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.clearStorageSync()
@@ -960,7 +959,7 @@ Taro.clearStorageSync()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getLocation(params).then(...)
@@ -972,7 +971,7 @@ Taro.getLocation(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.chooseLocation(params).then(...)
@@ -993,7 +992,7 @@ Taro.chooseLocation(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.openLocation(params).then(...)
@@ -1013,7 +1012,7 @@ Taro.openLocation(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const mapCtx = Taro.createMapContext('myMap')
@@ -1064,7 +1063,7 @@ const mapCtx = Taro.createMapContext('myMap')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getSystemInfo({
@@ -1100,7 +1099,7 @@ Taro.getSystemInfo({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const res = Taro.getSystemInfoSync()
@@ -1119,7 +1118,7 @@ console.log(res.platform)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.canIUse('openBluetoothAdapter')
@@ -1183,7 +1182,7 @@ Taro.canIUse('button.open-type.contact')
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getNetworkType({
@@ -1207,7 +1206,7 @@ Taro.getNetworkType({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onNetworkStatusChange(res => {
@@ -1231,7 +1230,7 @@ Taro.onNetworkStatusChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onAccelerometerChange(res => {
@@ -1247,7 +1246,7 @@ Taro.onAccelerometerChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startAccelerometer({ interval: 'game' })
@@ -1259,7 +1258,7 @@ Taro.startAccelerometer({ interval: 'game' })
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopAccelerometer()
@@ -1281,7 +1280,7 @@ Taro.stopAccelerometer()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onCompassChange(res => {
@@ -1295,7 +1294,7 @@ Taro.onCompassChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startCompass()
@@ -1307,7 +1306,7 @@ Taro.startCompass()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopCompass()
@@ -1329,7 +1328,7 @@ Taro.stopCompass()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.makePhoneCall(params).then(...)
@@ -1349,7 +1348,7 @@ Taro.makePhoneCall(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.scanCode(params).then(...)
@@ -1369,7 +1368,7 @@ Taro.scanCode(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setClipboardData(params).then(...)
@@ -1381,7 +1380,7 @@ Taro.setClipboardData(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getClipboardData(params).then(...)
@@ -1402,7 +1401,7 @@ Taro.getClipboardData(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.openBluetoothAdapter(params).then(...)
@@ -1414,7 +1413,7 @@ Taro.openBluetoothAdapter(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.closeBluetoothAdapter(params).then(...)
@@ -1426,7 +1425,7 @@ Taro.closeBluetoothAdapter(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBluetoothAdapterState(params).then(...)
@@ -1438,7 +1437,7 @@ Taro.getBluetoothAdapterState(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onBluetoothAdapterStateChange(res => {
@@ -1452,7 +1451,7 @@ Taro.onBluetoothAdapterStateChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startBluetoothDevicesDiscovery(params).then(...)
@@ -1464,7 +1463,7 @@ Taro.startBluetoothDevicesDiscovery(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopBluetoothDevicesDiscovery(params).then(...)
@@ -1476,7 +1475,7 @@ Taro.stopBluetoothDevicesDiscovery(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBluetoothDevices(params).then(...)
@@ -1488,7 +1487,7 @@ Taro.getBluetoothDevices(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getConnectedBluetoothDevices(params).then(...)
@@ -1500,7 +1499,7 @@ Taro.getConnectedBluetoothDevices(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onBluetoothDeviceFound(devices => {
@@ -1515,7 +1514,7 @@ Taro.onBluetoothDeviceFound(devices => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.createBLEConnection(params).then(...)
@@ -1527,7 +1526,7 @@ Taro.createBLEConnection(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.closeBLEConnection(params).then(...)
@@ -1539,7 +1538,7 @@ Taro.closeBLEConnection(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBLEDeviceServices(params).then(...)
@@ -1551,7 +1550,7 @@ Taro.getBLEDeviceServices(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBLEDeviceCharacteristics(params).then(...)
@@ -1563,7 +1562,7 @@ Taro.getBLEDeviceCharacteristics(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.readBLECharacteristicValue(params).then(...)
@@ -1575,7 +1574,7 @@ Taro.readBLECharacteristicValue(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.writeBLECharacteristicValue(params).then(...)
@@ -1587,7 +1586,7 @@ Taro.writeBLECharacteristicValue(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.notifyBLECharacteristicValueChange(params).then(...)
@@ -1599,7 +1598,7 @@ Taro.notifyBLECharacteristicValueChange(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onBLEConnectionStateChange(res => {
@@ -1614,7 +1613,7 @@ Taro.onBLEConnectionStateChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onBLECharacteristicValueChange(res => {
@@ -1654,7 +1653,7 @@ Taro.onBLECharacteristicValueChange(res => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startBeaconDiscovery(params).then(...)
@@ -1666,7 +1665,7 @@ Taro.startBeaconDiscovery(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopBeaconDiscovery(params).then(...)
@@ -1678,7 +1677,7 @@ Taro.stopBeaconDiscovery(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getBeacons(params).then(...)
@@ -1710,7 +1709,7 @@ Taro.getBeacons(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setScreenBrightness(params).then(...)
@@ -1722,7 +1721,7 @@ Taro.setScreenBrightness(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getScreenBrightness(params).then(...)
@@ -1734,7 +1733,7 @@ Taro.getScreenBrightness(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setKeepScreenOn(params).then(...)
@@ -1756,7 +1755,7 @@ Taro.setKeepScreenOn(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.onUserCaptureScreen(() => {
@@ -1778,7 +1777,7 @@ Taro.onUserCaptureScreen(() => {
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.vibrateLong(params).then(...)
@@ -1790,7 +1789,7 @@ Taro.vibrateLong(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.vibrateShort(params).then(...)
@@ -1811,7 +1810,7 @@ Taro.vibrateShort(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.addPhoneContact(params).then(...)
@@ -1831,7 +1830,7 @@ Taro.addPhoneContact(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getHCEState(params).then(...)
@@ -1843,7 +1842,7 @@ Taro.getHCEState(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startHCE(params).then(...)
@@ -1855,7 +1854,7 @@ Taro.startHCE(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopHCE(params).then(...)
@@ -1871,7 +1870,7 @@ Taro.stopHCE(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.sendHCEMessage(params).then(...)
@@ -1895,7 +1894,7 @@ Taro.sendHCEMessage(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startWifi(params).then(...)
@@ -1907,7 +1906,7 @@ Taro.startWifi(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopWifi(params).then(...)
@@ -1919,7 +1918,7 @@ Taro.stopWifi(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.connectWifi(params).then(...)
@@ -1931,7 +1930,7 @@ Taro.connectWifi(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getWifiList(params).then(...)
@@ -1947,7 +1946,7 @@ Taro.getWifiList(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setWifiList(params).then(...)
@@ -1963,7 +1962,7 @@ Taro.setWifiList(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getConnectedWifi(params).then(...)
@@ -2013,7 +2012,7 @@ Taro.getConnectedWifi(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.showToast({
@@ -2040,7 +2039,7 @@ Taro.showToast({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.showLoading({
@@ -2085,7 +2084,7 @@ Taro.showLoading({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 // 注意：无论用户点击确定还是取消，Promise 都会 resolve。
@@ -2116,7 +2115,7 @@ Taro.showModal({
 | :-- | :-- | :-- |
 | tapIndex | Number | 用户点击的按钮，从上到下的顺序，从0开始 |
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 // 注意：当用户点击选项时 Promise 会 resolve，而当用户点击取消或蒙层时，Promise 会 reject。
@@ -2146,7 +2145,7 @@ Taro.showActionSheet({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setNavigationBarTitle(params).then(...)
@@ -2166,7 +2165,7 @@ Taro.setNavigationBarTitle(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setNavigationBarColor(params).then(...)
@@ -2189,7 +2188,7 @@ Taro.setNavigationBarColor(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setTabBarBadge(params).then(...)
@@ -2201,7 +2200,7 @@ Taro.setTabBarBadge(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.removeTabBarBadge(params).then(...)
@@ -2213,7 +2212,7 @@ Taro.removeTabBarBadge(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.showTabBarRedDot(params).then(...)
@@ -2225,7 +2224,7 @@ Taro.showTabBarRedDot(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.hideTabBarRedDot(params).then(...)
@@ -2237,7 +2236,7 @@ Taro.hideTabBarRedDot(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setTabBarStyle(params).then(...)
@@ -2249,7 +2248,7 @@ Taro.setTabBarStyle(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setTabBarItem(params).then(...)
@@ -2261,7 +2260,7 @@ Taro.setTabBarItem(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.showTabBar(params).then(...)
@@ -2273,7 +2272,7 @@ Taro.showTabBar(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.hideTabBar(params).then(...)
@@ -2300,7 +2299,7 @@ Taro.hideTabBar(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.setTopBarText(params).then(...)
@@ -2320,7 +2319,7 @@ Taro.setTopBarText(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.navigateTo(params).then(...)
@@ -2332,7 +2331,7 @@ Taro.navigateTo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.redirectTo(params).then(...)
@@ -2344,7 +2343,7 @@ Taro.redirectTo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.switchTab(params).then(...)
@@ -2356,7 +2355,7 @@ Taro.switchTab(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.navigateBack({ delta: 2 })
@@ -2368,7 +2367,7 @@ Taro.navigateBack({ delta: 2 })
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.reLaunch(params).then(...)
@@ -2380,7 +2379,7 @@ Taro.reLaunch(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.getCurrentPages().length
@@ -2405,7 +2404,7 @@ Taro.getCurrentPages().length
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const animation = Taro.createAnimation({
@@ -2430,7 +2429,7 @@ const animation = Taro.createAnimation({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.pageScrollTo(params).then(...)
@@ -2472,7 +2471,7 @@ Taro.pageScrollTo(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.startPullDownRefresh(params).then(...)
@@ -2484,7 +2483,7 @@ Taro.startPullDownRefresh(params).then(...)
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.stopPullDownRefresh()
@@ -2505,7 +2504,7 @@ Taro.stopPullDownRefresh()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const query = Taro.createSelectorQuery()
@@ -2519,7 +2518,7 @@ const query = Taro.createSelectorQuery()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Component({
@@ -2556,7 +2555,7 @@ Component({
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 const query = Taro.createSelectorQuery()
@@ -2584,7 +2583,7 @@ query
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.createSelectorQuery()
@@ -2617,7 +2616,7 @@ Taro.createSelectorQuery()
 
 **示例代码：**
 
-```javascript
+```jsx
 import Taro from '@tarojs/taro'
 
 Taro.createSelectorQuery()
