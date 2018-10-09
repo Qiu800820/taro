@@ -133,7 +133,7 @@ class App extends Components {
 > 和 React/Nerv 的不同：
 > React 可以使用 `...` 拓展操作符来传递属性，但在 Taro 中你不能这么做。例如：
 > ```
-> const props = {firstName: ‘Plus’, lastName: ’Second’}
+> const props = {firstName: 'Plus', lastName: 'Second'}
 > return <Greeting {...props} />
 > ```
 > 这样的操作会报错。你只能手动地把所有需要引用的 props 写上去：
@@ -189,7 +189,7 @@ false、null、undefined 和 true 都是有效的 children，但它们不会直�
 <View>{true}</View>
 ```
 
-这在根据条件来确定是否渲染 元素时非常有用。以下的JSX只会在showHeader为true时渲染<Header />组件。
+这在根据条件来确定是否渲染 元素时非常有用。以下的 JSX 只会在 showHeader 为 true 时渲染<Header />组件。
 
 ```jsx
 <View>
@@ -210,7 +210,6 @@ const element = <Content footer={<View />} />
 
 这样的代码在 Nerv/React 中使用是没有问题的，但是在 Taro 中不能这么做。
 
-> 由于微信小程序内置的组件化的系统不能通过属性（props） 传函数，而 props 传递函数可以说 React 体系的根基之一，我们只能自己实现了一套组件化系统。而自制的组件化系统则不能使用内置组件化的 `slot` 功能。两权相害取其轻，我们暂时只能对这个功能忍痛割爱了。
 
 ### 自定义组件的名称必须和引入时一致
 
