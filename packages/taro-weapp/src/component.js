@@ -21,15 +21,16 @@ class BaseComponent {
   nextProps = {}
   _dirty = true
   _disable = true
+  _isForceUpdate = false
   _pendingStates = []
   _pendingCallbacks = []
   $router = {
     params: {}
   }
 
-  constructor () {
+  constructor (props = {}) {
     this.state = {}
-    this.props = {}
+    this.props = props
   }
   _constructor (props) {
     this.props = props || {}
@@ -71,6 +72,7 @@ class BaseComponent {
     if (isFunction(callback)) {
       (this._pendingCallbacks = this._pendingCallbacks || []).push(callback)
     }
+    this._isForceUpdate = true
     updateComponent(this)
   }
 
@@ -92,10 +94,14 @@ class BaseComponent {
     } else {
       // 普通的
       const keyLower = key.toLocaleLowerCase()
-      this.$scope.triggerEvent(keyLower, {
+      const detail = {
         __isCustomEvt: true,
         __arguments: args
-      })
+      }
+      if( args.length > 0 ){
+        detail.value = args.slice(1)
+      }
+      this.$scope.triggerEvent(keyLower, detail)
     }
   }
 }

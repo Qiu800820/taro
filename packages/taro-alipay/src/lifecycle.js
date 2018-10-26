@@ -9,7 +9,7 @@ import PropTypes from 'prop-types'
 const isDEV = typeof process === 'undefined' ||
   !process.env ||
   process.env.NODE_ENV !== 'production'
-const privatePropKeyName = '_triggerObserer'
+  const privatePropKeyName = '_triggerObserer'
 
 export function updateComponent (component) {
   const { props, __propTypes } = component
@@ -83,7 +83,6 @@ function doUpdate (component, prevProps, prevState) {
     })
     data = _data
   }
-  // 改变这个私有的props用来触发(observer)子组件的更新
   data[privatePropKeyName] = !privatePropKeyVal
   const dataDiff = diffObjToPath(data, component.$scope.data)
   component.$scope.setData(dataDiff, function () {

@@ -15,6 +15,10 @@ export const incrementId = () => {
   return () => id++
 }
 
+export function decodeUnicode (s: string) {
+  return unescape(s.replace(/\\(u[0-9a-fA-F]{4})/gm, '%$1'))
+}
+
 export function isVarName (str: string) {
   if (typeof str !== 'string') {
     return false
@@ -34,7 +38,7 @@ export function isVarName (str: string) {
   return true
 }
 
-export function findMethodName (expression: t.Expression) {
+export function findMethodName (expression: t.Expression): string {
   let methodName
   if (
     t.isIdentifier(expression) ||
@@ -42,7 +46,7 @@ export function findMethodName (expression: t.Expression) {
   ) {
     methodName = expression.name
   } else if (t.isStringLiteral(expression)) {
-    methodName = expression
+    methodName = expression.value
   } else if (
     t.isMemberExpression(expression) &&
     t.isIdentifier(expression.property)

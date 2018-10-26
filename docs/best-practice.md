@@ -53,7 +53,7 @@ const { property } = this.props
 const property = this.props.property
 ```
 
-但是一千个人心中有一千个哈姆雷特，不同人的代码写法肯定也不尽相同，所以 Taro 的编译肯定不能覆盖到所有的写法，而同时可能会有某一属性没有使用而是直接传递给子组件的情况，这种情况是编译时无论如何也处理不到的，这时候就需要大家在编码时给组件设置 [`defaultProps`](https://nervjs.github.io/taro/component.html#%E7%B1%BB%E5%B1%9E%E6%80%A7) 来解决了。
+但是一千个人心中有一千个哈姆雷特，不同人的代码写法肯定也不尽相同，所以 Taro 的编译肯定不能覆盖到所有的写法，而同时可能会有某一属性没有使用而是直接传递给子组件的情况，这种情况是编译时无论如何也处理不到的，这时候就需要大家在编码时给组件设置 [`defaultProps`](https://nervjs.github.io/taro/docs/component.html#defaultprops) 来解决了。
 
 组件设置的 `defaultProps` 会在运行时用来弥补编译时处理不到的情况，里面所有的属性都会被设置到 `properties` 中初始化组件，正确设置 `defaultProps` 可以避免很多异常的情况的出现。
 
@@ -129,7 +129,7 @@ componentWillMount () {
 }
 render () {
   // 增加一个兼容判断
-  return {this.state.abc && <Custom adc={abc} />}
+  return this.state.abc && <Custom adc={abc} />
 }
 ```
 
@@ -161,6 +161,34 @@ if (NODE_ENV === 'development') {
 // 正确写法
 if (process.env.NODE_ENV === 'development') {
 
+}
+```
+
+### 预加载
+
+在微信小程序中，从调用 `Taro.navigateTo`、`Taro.redirectTo` 或 `Taro.switchTab` 后，到页面触发 componentWillMount 会有一定延时。因此一些网络请求可以提前到发起跳转前一刻去请求。
+
+Taro 提供了 `componentWillPreload` 钩子，它接收页面跳转的参数作为参数。可以把需要预加载的内容通过 `return` 返回，然后在组件触发 componentWillMount 后即可通过 `this.$preloadData` 获取到预加载的内容。
+
+```jsx
+class Index extends Component {
+  componentWillMount () {
+    console.log('isFetching: ', this.isFetching)
+    this.$preloadData
+      .then(res => {
+        console.log('res: ', res)
+        this.isFetching = false
+      })
+  }
+
+  componentWillPreload (params) {
+    return this.fetchData(params.url)
+  }
+
+  fetchData () {
+    this.isFetching = true
+    ...
+  }
 }
 ```
 

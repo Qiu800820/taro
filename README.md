@@ -18,14 +18,14 @@
 
 Taro 已经投入了我们的生产环境中使用，业界也在广泛地使用 Taro 开发多端应用。
 
-![案例](https://i.loli.net/2018/09/21/5ba4944f67b49.jpg)
+![案例](https://i.loli.net/2018/10/24/5bcfe16f1b7c7.png)
 
 [征集更多优秀案例](https://github.com/NervJS/taro/issues/244)
 
 ## 示例项目
 
 * Taro Redux 示例 [taro-redux-sample](https://github.com/NervJS/taro-redux-sample)
-* [TodoMVC](https://github.com/NervJS/TodoMVC)
+* [TodoMVC](https://github.com/NervJS/TodoMVC) (小程序/H5/React Native)
 * Taro 组件库示例 [taro-components-sample](https://github.com/NervJS/taro-components-sample)
 * Taro 端能力示例 [taro-apis-sample](https://github.com/NervJS/taro-apis-sample)
 * Taro 实验性特性项目 [taro-todo](https://github.com/NervJS/taro-todo)
@@ -33,6 +33,7 @@ Taro 已经投入了我们的生产环境中使用，业界也在广泛地使用
 * [Taro整合Dva示例](https://github.com/zuoge85/taro-dva)
 * [V2ex小程序（TypeScript）](https://github.com/NervJS/taro-v2ex)
 * [与微信小程序原生融合的示例](https://github.com/NervJS/taro-sample-weapp)
+* 💯[基于Taro + Dva构建的时装衣橱(电商实战项目)](https://github.com/EasyTuan/taro-msparis)
 
 ## 文章教程
 
@@ -119,7 +120,7 @@ Taro 立足于微信小程序开发，众所周知小程序的开发体验并不
 
 #### 支持多端开发转化
 
-Taro 方案的初心就是为了打造一个多端开发的解决方案。目前 Taro 代码可以支持转换到 **微信小程序** 以及 **H5 端**。
+Taro 方案的初心就是为了打造一个多端开发的解决方案。目前 Taro 代码可以支持转换到 **微信小程序**/**H5 端**以及**移动端（React-Native）**。
 
 <div align="center"><img src="http://ww1.sinaimg.cn/large/49320207gy1fr21yeoexvj20hw0tu0vg.jpg" width="320"/><br><span style="font-size: 12px; color: #999;">微信小程序</span></div>
 

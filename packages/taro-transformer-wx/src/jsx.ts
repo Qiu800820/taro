@@ -4,7 +4,7 @@ import * as t from 'babel-types'
 import { kebabCase } from 'lodash'
 import { DEFAULT_Component_SET, SPECIAL_COMPONENT_PROPS } from './constant'
 import { createHTMLElement } from './create-html-element'
-import { codeFrameError } from './utils'
+import { codeFrameError, decodeUnicode } from './utils'
 import { Adapter, Adapters } from './adapter'
 
 export function isStartWithWX (str: string) {
@@ -118,10 +118,12 @@ function parseJSXChildren (
           return str + parseJSXElement(child.expression)
         }
         return str + `{${
-          generate(child, {
-            quotes: 'single'
-          })
-          .code
+          decodeUnicode(
+            generate(child, {
+              quotes: 'single'
+            })
+            .code
+          )
           .replace(/(this\.props\.)|(this\.state\.)/g, '')
           .replace(/(props\.)|(state\.)/g, '')
           .replace(/this\./, '')
@@ -134,6 +136,7 @@ function parseJSXChildren (
 export function parseJSXElement (element: t.JSXElement): string {
   const children = element.children
   const { attributes, name } = element.openingElement
+  const TRIGGER_OBSERER = Adapter.type === Adapters.swan ? 'privateTriggerObserer' : '__triggerObserer'
   if (t.isJSXMemberExpression(name)) {
     throw codeFrameError(name.loc, '暂不支持 JSX 成员表达式')
   }
@@ -155,20 +158,20 @@ export function parseJSXElement (element: t.JSXElement): string {
       let value: string | boolean = true
       let attrValue = attr.value
       if (typeof name === 'string') {
+        const isAlipayEvent = Adapter.type === Adapters.alipay && /(^on[A-Z_])|(^catch[A-Z_])/.test(name)
         if (t.isStringLiteral(attrValue)) {
           value = attrValue.value
         } else if (t.isJSXExpressionContainer(attrValue)) {
-          const isBindEvent =
+          let isBindEvent =
             (name.startsWith('bind') && name !== 'bind') || (name.startsWith('catch') && name !== 'catch')
-          let { code } = generate(attrValue.expression, {
-            quotes: 'single',
-            concise: true
-          })
-          code = code
+          const code = decodeUnicode(generate(attrValue.expression, {
+              quotes: 'single',
+              concise: true
+            }).code)
             .replace(/"/g, "'")
             .replace(/(this\.props\.)|(this\.state\.)/g, '')
             .replace(/this\./g, '')
-          value = isBindEvent ? code : `{{${code}}}`
+          value = isBindEvent || isAlipayEvent ? code : `{{${code}}}`
           if (Adapter.type === Adapters.swan && name === Adapter.for) {
             value = code
           }
@@ -181,9 +184,9 @@ export function parseJSXElement (element: t.JSXElement): string {
         if ((componentName === 'Input' || componentName === 'input') && name === 'maxLength') {
           obj['maxlength'] = value
         } else if (
-          componentSpecialProps &&
-          componentSpecialProps.has(name) ||
-          name.startsWith('__fn_')
+          componentSpecialProps && componentSpecialProps.has(name) ||
+          name.startsWith('__fn_') ||
+          isAlipayEvent
         ) {
           obj[name] = value
         } else {
@@ -191,12 +194,12 @@ export function parseJSXElement (element: t.JSXElement): string {
         }
       }
       if (!isDefaultComponent && !specialComponentName.includes(componentName)) {
-        obj['__triggerObserer'] = '{{ _triggerObserer }}'
+        obj[TRIGGER_OBSERER] = '{{ _triggerObserer }}'
       }
       return obj
     }, {})
   } else if (!isDefaultComponent && !specialComponentName.includes(componentName)) {
-    attributesTrans['__triggerObserer'] = '{{ _triggerObserer }}'
+    attributesTrans[TRIGGER_OBSERER] = '{{ _triggerObserer }}'
   }
   return createHTMLElement({
     name: kebabCase(componentName),
