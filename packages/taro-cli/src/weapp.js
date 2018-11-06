@@ -111,7 +111,10 @@ function traverseObjectNode (node, obj) {
     const properties = node.value.properties
     obj = {}
     properties.forEach(p => {
-      const key = t.isIdentifier(p.key) ? p.key.name : p.key.value
+      let key = t.isIdentifier(p.key) ? p.key.name : p.key.value
+      if (Util.CONFIG_MAP[buildAdapter][key]) {
+        key = Util.CONFIG_MAP[buildAdapter][key]
+      }
       obj[key] = traverseObjectNode(p.value)
     })
     return obj
@@ -146,19 +149,7 @@ function analyzeImportUrl ({ astPath, value, depComponents, sourceFilePath, file
     if (isFileToBePage(importPath)) {
       astPath.remove()
     } else {
-      let isDepComponent = false
-      if (depComponents && depComponents.length) {
-        depComponents.forEach(item => {
-          const resolvePath = Util.resolveScriptPath(path.resolve(path.dirname(sourceFilePath), item.path))
-          const resolveValuePath = Util.resolveScriptPath(path.resolve(path.dirname(sourceFilePath), value))
-          if (resolvePath === resolveValuePath) {
-            isDepComponent = true
-          }
-        })
-      }
-      if (isDepComponent) {
-        astPath.remove()
-      } else if (Util.REG_SCRIPT.test(valueExtname) || Util.REG_TYPESCRIPT.test(valueExtname)) {
+      if (Util.REG_SCRIPT.test(valueExtname) || Util.REG_TYPESCRIPT.test(valueExtname)) {
         const vpath = path.resolve(sourceFilePath, '..', value)
         let fPath = value
         if (fs.existsSync(vpath) && !NODE_MODULES_REG.test(vpath)) {
@@ -275,7 +266,7 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
   }, Util.generateEnvList(projectConfig.env || {}), Util.generateConstantsList(projectConfig.defineConstants || {}))
   ast = babel.transformFromAst(ast, '', {
     plugins: [
-      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojs/taro', 'react', 'nervjs'] }],
+      [require('babel-plugin-danger-remove-unused-import-taro'), { ignore: ['@tarojs/taro', 'react', 'nervjs'] }],
       [require('babel-plugin-transform-define').default, constantsReplaceList]
     ]
   }).ast
@@ -578,25 +569,7 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
                     astPath.remove()
                   }
                 } else {
-                  let isDepComponent = false
-                  if (depComponents && depComponents.length) {
-                    depComponents.forEach(item => {
-                      const resolvePath = Util.resolveScriptPath(path.resolve(path.dirname(sourceFilePath), item.path))
-                      const resolveValuePath = Util.resolveScriptPath(path.resolve(path.dirname(sourceFilePath), value))
-                      if (resolvePath === resolveValuePath) {
-                        isDepComponent = true
-                      }
-                    })
-                  }
-                  if (isDepComponent) {
-                    if (astPath.parent.type === 'AssignmentExpression' || 'ExpressionStatement') {
-                      astPath.parentPath.remove()
-                    } else if (astPath.parent.type === 'VariableDeclarator') {
-                      astPath.parentPath.parentPath.remove()
-                    } else {
-                      astPath.remove()
-                    }
-                  } else if (Util.REG_STYLE.test(valueExtname)) {
+                  if (Util.REG_STYLE.test(valueExtname)) {
                     const stylePath = path.resolve(path.dirname(sourceFilePath), value)
                     if (styleFiles.indexOf(stylePath) < 0) {
                       styleFiles.push(stylePath)
@@ -889,9 +862,30 @@ const babelConfig = _.mergeWith(defaultBabelConfig, pluginsConfig.babel, (objVal
   }
 })
 
-async function compileScriptFile (content) {
+const shouldTransformAgain = (function () {
+  const pluginsStr = JSON.stringify(babelConfig.plugins)
+  if (/transform-runtime/.test(pluginsStr)) {
+    return true
+  }
+  return false
+})()
+
+async function compileScriptFile (content, sourceFilePath, outputFilePath, adapter) {
   const compileScriptRes = await npmProcess.callPlugin('babel', content, entryFilePath, babelConfig)
-  return compileScriptRes.code
+  const code = compileScriptRes.code
+  if (!shouldTransformAgain) {
+    return code
+  }
+  const transformResult = wxTransformer({
+    code,
+    sourcePath: sourceFilePath,
+    outputPath: outputFilePath,
+    isNormal: true,
+    isTyped: false,
+    adapter
+  })
+  const res = parseAst(PARSE_AST_TYPE.NORMAL, transformResult.ast, [], sourceFilePath, outputFilePath)
+  return res.code
 }
 
 function buildProjectConfig () {
@@ -974,7 +968,7 @@ async function buildEntry () {
     // app.js的template忽略
     const res = parseAst(PARSE_AST_TYPE.ENTRY, transformResult.ast, [], entryFilePath, outputEntryFilePath)
     let resCode = res.code
-    resCode = await compileScriptFile(resCode)
+    resCode = await compileScriptFile(resCode, entryFilePath, outputEntryFilePath, buildAdapter)
     if (isProduction) {
       const uglifyPluginConfig = pluginsConfig.uglify || { enable: true }
       if (uglifyPluginConfig.enable) {
@@ -1015,15 +1009,16 @@ async function buildEntry () {
     // 处理res.configObj 中的tabBar配置
     const tabBar = res.configObj.tabBar
     if (tabBar && typeof tabBar === 'object' && !Util.isEmptyObject(tabBar)) {
-      const list = tabBar.list || []
+      const {
+        list: listConfig,
+        iconPath: pathConfig,
+        selectedIconPath: selectedPathConfig
+      } = Util.CONFIG_MAP[buildAdapter]
+      const list = tabBar[listConfig] || []
       let tabBarIcons = []
       list.forEach(item => {
-        if (item.iconPath) {
-          tabBarIcons.push(item.iconPath)
-        }
-        if (item.selectedIconPath) {
-          tabBarIcons.push(item.selectedIconPath)
-        }
+        item[pathConfig] && tabBarIcons.push(item[pathConfig])
+        item[selectedPathConfig] && tabBarIcons.push(item[selectedPathConfig])
       })
       tabBarIcons = tabBarIcons.map(item => path.resolve(sourceDir, item))
       if (tabBarIcons && tabBarIcons.length) {
@@ -1108,7 +1103,10 @@ function transfromNativeComponents (configFile, componentConfig) {
         Util.printLog(Util.pocessTypeEnum.REFERENCE, '插件引用', `使用了插件 ${chalk.bold(componentPath)}`)
         return
       }
-      const componentJSPath = Util.resolveScriptPath(path.resolve(path.dirname(configFile), componentPath))
+      let componentJSPath = Util.resolveScriptPath(path.resolve(path.dirname(configFile), componentPath))
+      if (!fs.existsSync(componentJSPath)) {
+        componentJSPath = Util.resolveScriptPath(path.join(sourceDir, componentPath))
+      }
       const componentJSONPath = componentJSPath.replace(path.extname(componentJSPath), outputFilesTypes.CONFIG)
       const componentWXMLPath = componentJSPath.replace(path.extname(componentJSPath), outputFilesTypes.TEMPL)
       const componentWXSSPath = componentJSPath.replace(path.extname(componentJSPath), outputFilesTypes.STYLE)
@@ -1184,7 +1182,7 @@ async function buildSinglePage (page) {
     const pageDepComponents = transformResult.components
     const res = parseAst(PARSE_AST_TYPE.PAGE, transformResult.ast, pageDepComponents, pageJs, outputPageJSPath)
     let resCode = res.code
-    resCode = await compileScriptFile(resCode)
+    resCode = await compileScriptFile(resCode, pageJs, outputPageJSPath, buildAdapter)
     if (isProduction) {
       const uglifyPluginConfig = pluginsConfig.uglify || { enable: true }
       if (uglifyPluginConfig.enable) {
@@ -1522,7 +1520,7 @@ async function buildSingleComponent (componentObj, buildConfig = {}) {
     const componentDepComponents = transformResult.components
     const res = parseAst(PARSE_AST_TYPE.COMPONENT, transformResult.ast, componentDepComponents, component, outputComponentJSPath, buildConfig.npmSkip)
     let resCode = res.code
-    resCode = await compileScriptFile(resCode)
+    resCode = await compileScriptFile(resCode, component, outputComponentJSPath, buildAdapter)
     fs.ensureDirSync(path.dirname(outputComponentJSPath))
     if (isProduction) {
       const uglifyPluginConfig = pluginsConfig.uglify || { enable: true }
@@ -1669,7 +1667,7 @@ function compileDepScripts (scriptFiles) {
           const res = parseAst(PARSE_AST_TYPE.NORMAL, ast, [], item, outputItem)
           const fileDep = dependencyTree[item] || {}
           let resCode = res.code
-          resCode = await compileScriptFile(res.code)
+          resCode = await compileScriptFile(res.code, item, outputItem, buildAdapter)
           fs.ensureDirSync(path.dirname(outputItem))
           if (isProduction) {
             const uglifyPluginConfig = pluginsConfig.uglify || { enable: true }
