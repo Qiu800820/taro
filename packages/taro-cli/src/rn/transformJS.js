@@ -36,7 +36,9 @@ const PACKAGES = {
   '@tarojs/components-rn': '@tarojs/components-rn',
   'react': 'react',
   'react-native': 'react-native',
-  'react-redux-rn': '@tarojs/taro-redux-rn'
+  'react-redux-rn': '@tarojs/taro-redux-rn',
+  '@tarojs/mobx': '@tarojs/mobx',
+  '@tarojs/mobx-rn': '@tarojs/mobx-rn'
 }
 
 function getInitPxTransformNode (projectConfig) {
@@ -65,8 +67,16 @@ function getClassPropertyVisitor ({filePath, pages, iconPaths, isEntryFile}) {
           const value = node.value
           // if (key.name !== 'pages' || !t.isArrayExpression(value)) return
           if (key.name === 'pages' && t.isArrayExpression(value)) {
+            // 分包
+            let root = ''
+            const rootNode = astPath.parent.properties.find(v => {
+              return v.key.name === 'root'
+            })
+            root = rootNode ? rootNode.value.value : ''
+
             value.elements.forEach(v => {
-              pages.push(v.value)
+              const pagePath = `${root}/${v.value}`.replace(/\/{2,}/g, '/')
+              pages.push(pagePath.replace(/^\//, ''))
             })
             astPath.remove()
           }
@@ -111,9 +121,7 @@ function getJSAst (code, filePath) {
     sourcePath: filePath,
     isNormal: true,
     isTyped: Util.REG_TYPESCRIPT.test(filePath),
-    env: {
-      TARO_ENV: Util.BUILD_TYPES.RN
-    }
+    adapter: 'rn'
   }).ast
 }
 
@@ -159,7 +167,7 @@ const ClassDeclarationOrExpression = {
       node.superClass.type === 'MemberExpression' &&
       node.superClass.object.name === taroImportDefaultName
     ) {
-      node.superClass.object.name = reactImportDefaultName
+      node.superClass.object.name = taroImportDefaultName
       if (node.id === null) {
         const renameComponentClassName = '_TaroComponentClass'
         componentClassName = renameComponentClassName
@@ -216,10 +224,13 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
     ImportDeclaration (astPath) {
       const node = astPath.node
       const source = node.source
-      const value = source.value
+      let value = source.value
       const valueExtname = path.extname(value)
       const specifiers = node.specifiers
-
+      const pathAlias = projectConfig.pathAlias || {}
+      if (Util.isAliasPath(value, pathAlias)) {
+        source.value = value = Util.replaceAliasPath(filePath, value, pathAlias)
+      }
       // 引入的包为 npm 包
       if (!Util.isNpmPkg(value)) {
         // import 样式处理
@@ -277,6 +288,17 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
           specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
         }
         source.value = PACKAGES['react-redux-rn']
+      } else if (value === PACKAGES['@tarojs/mobx']) {
+        const specifier = specifiers.find(item => {
+          return t.isImportSpecifier(item) && item.imported.name === providerComponentName
+        })
+        if (specifier) {
+          providorImportName = specifier.local.name
+        } else {
+          providorImportName = providerComponentName
+          specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
+        }
+        source.value = PACKAGES['@tarojs/mobx-rn']
       } else if (value === PACKAGES['@tarojs/components']) {
         source.value = PACKAGES['@tarojs/components-rn']
       }
@@ -336,7 +358,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
               funcBody = `<RootStack/>`
             }
             if (providerComponentName && storeName) {
-              // 使用redux
+              // 使用redux 或 mobx
               funcBody = `
                 <${providorImportName} store={${storeName}}>
                   ${funcBody}
@@ -449,6 +471,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
       plugins: [
         [require('babel-plugin-transform-jsx-to-stylesheet'), {filePath}],
         require('babel-plugin-transform-decorators-legacy').default,
+        require('babel-plugin-transform-class-properties'),
         [require('babel-plugin-danger-remove-unused-import'), {ignore: ['@tarojs/taro', 'react', 'react-native', 'nervjs']}],
         [require('babel-plugin-transform-define').default, constantsReplaceList]
       ]

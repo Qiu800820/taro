@@ -3,10 +3,14 @@ export const ENV_TYPE = {
   WEB: 'WEB',
   RN: 'RN',
   SWAN: 'SWAN',
-  ALIPAY: 'ALIPAY'
+  ALIPAY: 'ALIPAY',
+  TT: 'TT'
 }
 
 export function getEnv () {
+  if (typeof tt !== 'undefined' && tt.getSystemInfo) {
+    return ENV_TYPE.TT
+  }
   if (typeof wx !== 'undefined' && wx.getSystemInfo) {
     return ENV_TYPE.WEAPP
   }

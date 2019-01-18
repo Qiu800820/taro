@@ -2,17 +2,44 @@ import * as t from 'babel-types'
 import generate from 'babel-generator'
 import { codeFrameColumns } from '@babel/code-frame'
 import { NodePath, Scope } from 'babel-traverse'
-import { LOOP_STATE } from './constant'
+import { LOOP_STATE, TARO_PACKAGE_NAME } from './constant'
 import { cloneDeep } from 'lodash'
 import * as fs from 'fs'
 import * as path from 'path'
 import { buildBlockElement } from './jsx'
 import { Adapter } from './adapter'
+import { transformOptions } from './options'
 const template = require('babel-template')
 
 export const incrementId = () => {
   let id = 0
   return () => id++
+}
+
+export function getSuperClassCode (path: NodePath<t.ClassDeclaration>) {
+  const superClass = path.node.superClass
+  if (t.isIdentifier(superClass)) {
+    const binding = path.scope.getBinding(superClass.name)
+    if (binding && binding.kind === 'module') {
+      const bindingPath = binding.path.parentPath
+      if (bindingPath.isImportDeclaration()) {
+        const source = bindingPath.node.source
+        if (source.value === TARO_PACKAGE_NAME) {
+          return
+        }
+        try {
+          const p = pathResolver(source.value, transformOptions.sourcePath) + (transformOptions.isTyped ? '.tsx' : '.js')
+          const code = fs.readFileSync(p, 'utf8')
+          return {
+            code,
+            sourcePath: source.value
+          }
+        } catch (error) {
+          return
+        }
+      }
+    }
+  }
 }
 
 export function decodeUnicode (s: string) {
@@ -82,6 +109,31 @@ export function findMethodName (expression: t.Expression): string {
 export function setParentCondition (jsx: NodePath<t.Node>, expr: t.Expression, array = false) {
   const conditionExpr = jsx.findParent(p => p.isConditionalExpression())
   const logicExpr = jsx.findParent(p => p.isLogicalExpression({ operator: '&&' }))
+  if (array) {
+    const ifAttrSet = new Set<string>([
+      Adapter.if,
+      Adapter.else
+    ])
+    const logicalJSX = jsx.findParent(p => p.isJSXElement() && p.node.openingElement.attributes.some(a => ifAttrSet.has(a.name.name as string))) as NodePath<t.JSXElement>
+    if (logicalJSX) {
+      const attr = logicalJSX.node.openingElement.attributes.find(a => ifAttrSet.has(a.name.name as string))
+      if (attr) {
+        if (attr.name.name === Adapter.else) {
+          const prevElement: NodePath<t.JSXElement | null> = (logicalJSX as any).getPrevSibling()
+          if (prevElement && prevElement.isJSXElement()) {
+            const attr = prevElement.node.openingElement.attributes.find(a => a.name.name === Adapter.if)
+            if (attr && t.isJSXExpressionContainer(attr.value)) {
+              expr = t.conditionalExpression(reverseBoolean(attr.value.expression), expr, t.arrayExpression())
+              return expr
+            }
+          }
+        } else if (t.isJSXExpressionContainer(attr.value)) {
+          expr = t.conditionalExpression(attr.value.expression, expr, t.arrayExpression())
+          return expr
+        }
+      }
+    }
+  }
   if (conditionExpr && conditionExpr.isConditionalExpression()) {
     const consequent = conditionExpr.get('consequent')
     if (consequent === jsx || jsx.findParent(p => p === consequent)) {
@@ -229,13 +281,15 @@ export function pathResolver (source: string, location: string) {
 export function codeFrameError (node, msg: string) {
   let errMsg = ''
   try {
-    errMsg = codeFrameColumns(setting.sourceCode, node && node.type && node.loc ? node.loc : node)
+    errMsg = codeFrameColumns(setting.sourceCode, node && node.type && node.loc ? node.loc : node, {
+      highlightCode: true
+    })
   } catch (error) {
     errMsg = 'failed to locate source'
   }
   return new Error(`${msg}
-  -----
-  ${errMsg}`)
+-----
+${errMsg}`)
 }
 
 export const setting = {
@@ -288,6 +342,10 @@ export function newJSXIfAttr (jsx: t.JSXElement, value: t.Identifier | t.Express
   }
 }
 
+export function getSlotName (name: string) {
+  return name.slice(6).toLowerCase()
+}
+
 export function isContainJSXElement (path: NodePath<t.Node>) {
   let matched = false
   path.traverse({
@@ -312,7 +370,7 @@ export function hasComplexExpression (path: NodePath<t.Node>) {
   }
   if (path.isArrayExpression()) {
     const { elements } = path.node
-    if (elements.some(el => t.isObjectExpression(el as any))) {
+    if (elements.some(el => t.isObjectExpression(el as any) || t.isArrayExpression(el))) {
       return true
     }
   }

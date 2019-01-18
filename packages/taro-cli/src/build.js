@@ -33,6 +33,9 @@ function build (args, buildConfig) {
     case Util.BUILD_TYPES.ALIPAY:
       buildForAlipay({ watch })
       break
+    case Util.BUILD_TYPES.TT:
+      buildForTt({ watch })
+      break
     case Util.BUILD_TYPES.RN:
       buildForRN({ watch })
       break
@@ -40,7 +43,7 @@ function build (args, buildConfig) {
       buildForUILibrary({ watch })
       break
     default:
-      console.log(chalk.red('输入类型错误，目前只支持 weapp/h5/rn/swan/alipay 五端类型'))
+      console.log(chalk.red('输入类型错误，目前只支持 weapp/h5/rn/swan/alipay/tt 六端类型'))
   }
 }
 
@@ -62,6 +65,13 @@ function buildForAlipay ({ watch }) {
   require('./weapp').build({
     watch,
     adapter: Util.BUILD_TYPES.ALIPAY
+  })
+}
+
+function buildForTt ({ watch }) {
+  require('./weapp').build({
+    watch,
+    adapter: Util.BUILD_TYPES.TT
   })
 }
 

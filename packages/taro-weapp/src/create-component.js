@@ -1,13 +1,17 @@
+import { getCurrentPageUrl } from '@tarojs/utils'
+
 import { isEmptyObject, noop } from './util'
 import { updateComponent } from './lifecycle'
 import { cacheDataSet, cacheDataGet, cacheDataHas } from './data-cache'
+
 const privatePropValName = '__triggerObserer'
 const anonymousFnNamePreffix = 'funPrivate'
 const componentFnReg = /^__fn_/
 const routerParamsPrivateKey = '__key_'
 const preloadPrivateKey = '__preload_'
+const PRELOAD_DATA_KEY = 'preload'
 const preloadInitedComponent = '$preloadComponent'
-const pageExtraFns = ['onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
+const pageExtraFns = ['onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap', 'onResize']
 
 function bindProperties (weappComponentConf, ComponentClass, isPage) {
   weappComponentConf.properties = ComponentClass.properties || {}
@@ -66,6 +70,17 @@ function bindStaticOptions (weappComponentConf, ComponentClass) {
   }
 }
 
+function bindMultipleSlots (weappComponentConf, ComponentClass) {
+  const multipleSlots = ComponentClass.multipleSlots
+  if (!multipleSlots) {
+    return
+  }
+  weappComponentConf.options = {
+    ...weappComponentConf.options,
+    ...{ multipleSlots }
+  }
+}
+
 function bindStaticFns (weappComponentConf, ComponentClass) {
   for (const key in ComponentClass) {
     typeof ComponentClass[key] === 'function' && (weappComponentConf[key] = ComponentClass[key])
@@ -103,16 +118,17 @@ function processEvent (eventHandlerName, obj) {
     // 解析从dataset中传过来的参数
     const dataset = event.currentTarget.dataset || {}
     const bindArgs = {}
-    const eventHandlerNameLower = eventHandlerName.toLocaleLowerCase()
+    const eventType = event.type.toLocaleLowerCase()
     Object.keys(dataset).forEach(key => {
       let keyLower = key.toLocaleLowerCase()
       if (/^e/.test(keyLower)) {
         // 小程序属性里中划线后跟一个下划线会解析成不同的结果
         keyLower = keyLower.replace(/^e/, '')
-        keyLower = keyLower.toLocaleLowerCase()
-        if (keyLower.indexOf(eventHandlerNameLower) >= 0) {
-          const argName = keyLower.replace(eventHandlerNameLower, '')
-          bindArgs[argName] = dataset[key]
+        if (keyLower.indexOf(eventType) >= 0) {
+          const argName = keyLower.replace(eventType, '')
+          if (/^(a[a-z]|so)$/.test(argName)) {
+            bindArgs[argName] = dataset[key]
+          }
         }
       }
     })
@@ -160,7 +176,7 @@ function processEvent (eventHandlerName, obj) {
       }
       realArgs = [_scope, ...datasetArgs, ...detailArgs, event]
     }
-    scope[eventHandlerName].apply(callScope, realArgs)
+    return scope[eventHandlerName].apply(callScope, realArgs)
   }
 }
 
@@ -180,8 +196,7 @@ function filterProps (properties, defaultProps = {}, componentProps = {}, weappC
     }
     if (typeof componentProps[propName] === 'function') {
       newProps[propName] = componentProps[propName]
-    } else if (propName in weappComponentData &&
-      (properties[propName].value !== null || weappComponentData[propName] !== null)) {
+    } else if (propName in weappComponentData) {
       newProps[propName] = weappComponentData[propName]
     }
     if (componentFnReg.test(propName)) {
@@ -194,7 +209,7 @@ function filterProps (properties, defaultProps = {}, componentProps = {}, weappC
   }
   if (!isEmptyObject(defaultProps)) {
     for (const propName in defaultProps) {
-      if (newProps[propName] === undefined) {
+      if (newProps[propName] === undefined || newProps[propName] === null) {
         newProps[propName] = defaultProps[propName]
       }
     }
@@ -220,7 +235,7 @@ export function componentTrigger (component, key, args) {
         let target
         if (ref.type === 'component') {
           target = component.$scope.selectComponent(`#${ref.id}`)
-          target = target.$component || target
+          target = target ? (target.$component || target) : null
         } else {
           const query = wx.createSelectorQuery().in(component.$scope)
           target = query.select(`#${ref.id}`)
@@ -240,7 +255,8 @@ export function componentTrigger (component, key, args) {
     component._dirty = true
     component._disable = true
     component.$router = {
-      params: {}
+      params: {},
+      path: ''
     }
     component._pendingStates = []
     component._pendingCallbacks = []
@@ -271,6 +287,8 @@ function initComponent (ComponentClass, isPage) {
   if (!isPage) {
     const nextProps = filterProps(ComponentClass.properties, ComponentClass.defaultProps, this.$component.props, this.data)
     this.$component.props = nextProps
+  } else {
+    this.$component.$router.path = getCurrentPageUrl()
   }
   updateComponent(this.$component)
 }
@@ -285,7 +303,11 @@ function createComponent (ComponentClass, isPage) {
   try {
     componentInstance.state = componentInstance._createData() || componentInstance.state
   } catch (err) {
-    console.warn(`[Taro warn] 请给组件提供一个 \`defaultProps\` 以提高初次渲染性能！`)
+    if (isPage) {
+      console.warn(`[Taro warn] 请给页面提供初始 \`state\` 以提高初次渲染性能！`)
+    } else {
+      console.warn(`[Taro warn] 请给组件提供一个 \`defaultProps\` 以提高初次渲染性能！`)
+    }
     console.warn(err)
   }
   initData = Object.assign({}, initData, componentInstance.props, componentInstance.state)
@@ -296,7 +318,7 @@ function createComponent (ComponentClass, isPage) {
       if (isPage && cacheDataHas(preloadInitedComponent)) {
         this.$component = cacheDataGet(preloadInitedComponent, true)
       } else {
-        this.$component = new ComponentClass()
+        this.$component = new ComponentClass({}, isPage)
       }
       this.$component._init(this)
       this.$component.render = this.$component._createData
@@ -314,6 +336,10 @@ function createComponent (ComponentClass, isPage) {
         } else {
           // 直接启动，非内部跳转
           params = filterParams(this.data, ComponentClass.defaultParams)
+        }
+        if (cacheDataHas(PRELOAD_DATA_KEY)) {
+          const data = cacheDataGet(PRELOAD_DATA_KEY, true)
+          this.$component.$router.preload = data
         }
         Object.assign(this.$component.$router.params, params)
         // preload
@@ -365,11 +391,26 @@ function createComponent (ComponentClass, isPage) {
       }
     })
     __wxRoute && cacheDataSet(__wxRoute, ComponentClass)
+  } else {
+    weappComponentConf.pageLifetimes = weappComponentConf.pageLifetimes || {}
+
+    weappComponentConf.pageLifetimes['show'] = function () {
+      componentTrigger(this.$component, 'componentDidShow')
+    }
+
+    weappComponentConf.pageLifetimes['hide'] = function () {
+      componentTrigger(this.$component, 'componentDidHide')
+    }
+
+    weappComponentConf.pageLifetimes['resize'] = function () {
+      componentTrigger(this.$component, 'onResize')
+    }
   }
   bindProperties(weappComponentConf, ComponentClass, isPage)
   bindBehaviors(weappComponentConf, ComponentClass)
   bindStaticFns(weappComponentConf, ComponentClass)
   bindStaticOptions(weappComponentConf, ComponentClass)
+  bindMultipleSlots(weappComponentConf, ComponentClass)
   ComponentClass['$$events'] && bindEvents(weappComponentConf, ComponentClass['$$events'], isPage)
   if (ComponentClass['externalClasses'] && ComponentClass['externalClasses'].length) {
     weappComponentConf['externalClasses'] = ComponentClass['externalClasses']

@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import { merge } from 'lodash'
 import * as opn from 'opn'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
@@ -13,13 +12,13 @@ import devConf from './config/dev.conf'
 import baseDevServerOption from './config/devServer.conf'
 import dllConf from './config/dll.conf'
 import prodConf from './config/prod.conf'
-import { appPath } from './util'
+import { appPath, addLeadingSlash, addTrailingSlash, recursiveMerge } from './util'
 import { bindDevLogger, bindProdLogger, bindDllLogger, printBuildError } from './util/logHelper'
 import { BuildConfig } from './util/types'
 
-const customizeChain = (chain, config) => {
-  if (config.webpackChain instanceof Function) {
-    config.webpackChain(chain, webpack)
+const customizeChain = (chain, customizeFunc: Function) => {
+  if (customizeFunc instanceof Function) {
+    customizeFunc(chain, webpack)
   }
 }
 
@@ -35,6 +34,9 @@ const buildDll = async (config: BuildConfig): Promise<any> => {
   if (config.enableDll === false) return Promise.resolve()
   return new Promise((resolve, reject) => {
     const webpackChain = dllConf(config)
+
+    customizeChain(webpackChain, config.dllWebpackChain)
+    
     const webpackConfig = webpackChain.toConfig()
     const compiler = webpack(webpackConfig)
     bindDllLogger(compiler)
@@ -54,7 +56,7 @@ const buildProd = (config: BuildConfig): Promise<void> => {
     const webpackChain = prodConf(config)
     let webpackConfig
 
-    customizeChain(webpackChain, config)
+    customizeChain(webpackChain, config.webpackChain)
 
     if (config.webpack) {
       webpackConfig = deprecatedCustomizeConfig(webpackChain.toConfig(), config.webpack)
@@ -78,23 +80,29 @@ const buildProd = (config: BuildConfig): Promise<void> => {
 const buildDev = async (config: BuildConfig): Promise<any> => {
   return new Promise((resolve, reject) => {
     const conf = buildConf(config)
-    const publicPath = conf.publicPath
+    const routerConfig = config.router || {}
+    const routerMode = routerConfig.mode === 'browser' ? 'browser' : 'hash'
+    const routerBasename = routerConfig.basename || '/'
+    const publicPath = conf.publicPath ? addLeadingSlash(addTrailingSlash(conf.publicPath)) : '/'
     const outputPath = path.join(appPath, conf.outputRoot as string)
     const customDevServerOption = config.devServer || {}
     const webpackChain = devConf(config)
     let webpackConfig
 
-    customizeChain(webpackChain, config)
+    customizeChain(webpackChain, config.webpackChain)
 
     webpackConfig = webpackChain.toConfig()
     if (config.webpack) {
       webpackConfig = deprecatedCustomizeConfig(webpackChain.toConfig(), config.webpack)
     }
 
-    const devServerOptions = merge(
+    const devServerOptions = recursiveMerge(
       {
         publicPath,
-        contentBase: outputPath
+        contentBase: outputPath,
+        historyApiFallback: {
+          index: publicPath
+        }
       },
       baseDevServerOption,
       customDevServerOption
@@ -103,7 +111,7 @@ const buildDev = async (config: BuildConfig): Promise<any> => {
       protocol: devServerOptions.https ? 'https' : 'http',
       hostname: devServerOptions.host,
       port: devServerOptions.port,
-      pathname: publicPath
+      pathname: routerMode === 'browser' ? routerBasename : '/'
     })
     WebpackDevServer.addDevServerEntrypoints(webpackConfig, devServerOptions)
     const compiler = webpack(webpackConfig)
@@ -116,7 +124,11 @@ const buildDev = async (config: BuildConfig): Promise<any> => {
         return console.log(err)
       }
       resolve()
-      opn(devUrl)
+
+      /* 补充处理devServer.open配置 */
+      if (devServerOptions.open) {
+        opn(devUrl)
+      }
     })
   })
 }

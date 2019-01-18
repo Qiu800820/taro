@@ -10,9 +10,20 @@ title: 最佳实践
 * [不能使用 Array#map 之外的方法操作 JSX 数组](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/manipulate-jsx-as-array.md)
 * [不能在 JSX 参数中使用匿名函数](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/no-anonymous-function-in-props.md)
 * [暂不支持在 render() 之外的方法定义 JSX](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/no-jsx-in-class-method.md)
-* [不允许在 JSX 参数(props)中传入 JSX 元素](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/no-jsx-in-props.md)
 * [不能在 JSX 参数中使用对象展开符](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/no-spread-in-props.md)
 * [不支持无状态组件](https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/no-stateless-function.md)
+
+以上的规则在 Taro 默认生成的模板都有 ESLint 检测，无需做任何配置。如果你的编辑器没有安装 ESLint 插件可以参考以下教程在你的编辑器安装：
+
+* [VSCode](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+* [IntelliJ IDEA(WebStorm 等 JetBrains 系)](https://www.jetbrains.com/help/idea/eslint.html)
+* [Sublime Text](https://packagecontrol.io/packages/ESLint)
+
+默认情况下 Taro 的编译器也会对无法运行的代码进行警告，当没有调用栈信息时代码是可以生成的。如果你需要在编译时禁用掉 ESLint 检查，可以在命令前加入 `ESLINT=false` 参数，例如：
+
+```bash
+$ ESLINT=false taro build --type weapp --watch
+```
 
 ## 最佳编码方式
 
@@ -100,6 +111,59 @@ class Parent extends Component {
 
 在微信小程序端是通过 `<slot />` 来实现往自定义组件中传入元素的，而 Taro 利用 `this.props.children` 在编译时实现了这一功能， `this.props.children` 会直接被编译成 `<slot />` 标签，所以它在小程序端属于语法糖的存在，请不要在组件中打印它。
 
+### 支持 props 传入 JSX
+
+> 自 `1.1.9` 开始支持
+
+支持 props 传入 JSX，但是元素传入 JSX 的属性名必须以 `render` 开头
+
+例如，子组件写法
+
+```javascript
+class Dialog extends Component {
+  render () {
+    return (
+      <View className='dialog'>
+        <View className='header'>
+          {this.props.renderHeader}
+        </View>
+        <View className='body'>
+          {this.props.children}
+        </View>
+        <View className='footer'>
+          {this.props.renderFooter}
+        </View>
+      </View>
+    )
+  }
+}
+```
+
+父组件调用子组件是传入 JSX
+
+```javascript
+class App extends Component {
+  render () {
+    return (
+      <View className='container'>
+        <Dialog
+          renderHeader={
+            <View className='welcome-message'>Welcome!</View>
+          }
+          renderFooter={
+            <Button className='close'>Close</Button>
+          }
+        >
+          <View className="dialog-message">
+            Thank you for using Taro.
+          </View>
+        </Dialog>
+      </View>
+    )
+  }
+}
+```
+
 ### 组件属性传递注意
 
 不要以 `id`、`class`、`style` 作为自定义组件的属性与内部 state 的名称，因为这些属性名在微信小程序小程序中会丢失。
@@ -164,11 +228,17 @@ if (process.env.NODE_ENV === 'development') {
 }
 ```
 
+### 使用 `this.$componentType` 来判断当前 Taro.Component 是页面还是组件
+
+`this.$componentType` 可能取值分别为 `PAGE` 和 `COMPONENT`，开发者可以根据此变量的取值分别采取不同逻辑。
+
 ### 预加载
 
 在**微信小程序中**，从调用 `Taro.navigateTo`、`Taro.redirectTo` 或 `Taro.switchTab` 后，到页面触发 componentWillMount 会有一定延时。因此一些网络请求可以提前到发起跳转前一刻去请求。
 
 Taro 提供了 `componentWillPreload` 钩子，它接收页面跳转的参数作为参数。可以把需要预加载的内容通过 `return` 返回，然后在页面触发 componentWillMount 后即可通过 `this.$preloadData` 获取到预加载的内容。
+
+注意：调用跳转方法时需要使用**绝对路径**，相对路径不会触发此钩子。
 
 ```jsx
 class Index extends Component {
@@ -189,6 +259,50 @@ class Index extends Component {
     this.isFetching = true
     ...
   }
+}
+```
+
+### 在小程序中，可以使用 this.$preload 函数进行页面跳转传参
+
+用法：`this.$preload(key:String|Object, [value: Any])`
+
+之所以命名为 $preload，因为它也有一点预加载数据的意味。
+
+如果觉得每次页面跳转传参时，需要先把参数 stringify 后加到 url 的查询字符串中很繁琐，可以利用 `this.$preload` 进行传参。
+
+另外如果传入的是下一个页面的数据请求 promise，也有上一点提到的“预加载”功能，也能够绕过 componentWillMount 延时。不同点主要在于代码管理，开发者可酌情使用。
+
+例子:
+
+```js
+// 传入单个参数
+
+// A 页面
+// 调用跳转方法前使用 this.$preload
+this.$preload('key', 'val')
+Taro.navigateTo({ url: '/pages/B/B' })
+
+// B 页面
+// 可以于 this.$router.preload 中访问到 this.$preload 传入的参数
+componentWillMount () {
+  console.log('preload: ', this.$router.preload.key)
+}
+```
+
+
+```js
+// 传入多个参数
+
+// A 页面
+this.$preload({
+  x: 1,
+  y: 2
+})
+Taro.navigateTo({ url: '/pages/B/B' })
+
+// B 页面
+componentWillMount () {
+  console.log('preload: ', this.$router.preload)
 }
 ```
 

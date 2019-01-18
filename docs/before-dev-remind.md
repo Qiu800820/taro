@@ -73,6 +73,12 @@ border{Top,Right,Bottom,Left} 的简写（shorthands）不支持，因为 `borde
 #### React Native 不支持 background-image ，有什么解决办法吗？
 使用 `Image 组件`，配合 Flex 布局，基本可以实现你的大部分需求。阅读一下这篇文章：[Background Images in React Native](https://thekevinscott.com/background-images-in-react-native/)，有助于你理解。
 
+### 页面怎样设置高度 100%
+RN 端页面默认 `disableScroll` 为 `true`，和微信小程序保持一致。要想设置高度 100% ，得先在页面配置：`disableScroll :false`，然后配合 `height: 100%;` 即可。
+
+### 可以使用微信/支付宝支付吗？
+由于 Expo 不支持原生的 SDK，所以无法通过集成原生的 SDK 的方式使用微信/支付宝支付。不过 RN 端提供了 `Taro.openUrl({url:''})`的 API 打开手机浏览器，然后走 [手机网站支付](https://docs.open.alipay.com/203/105288/) 的流程。
+
 
 ### 其他注意事项
 1. **运行时** 报缺少包，需要要在 `.rn_temp` 目录里面安装。
@@ -82,7 +88,7 @@ border{Top,Right,Bottom,Left} 的简写（shorthands）不支持，因为 `borde
 5. React Native 与 H5/小程序 的Flex 布局相关属性的默认值有差异
 
 ## 样式
-React Native 的样式基于开源的跨平台布局引擎 [Yaga](https://github.com/facebook/yoga)  ，样式基本上是实现了 CSS 的一个子集，但是属性名不完全一致，具体的内容及相关差异可以查看文档 [React Native Layout Props](https://facebook.github.io/react-native/docs/layout-props)。Taro React Native 端样式文件的处理，主要可以分为以下几步：
+React Native 的样式基于开源的跨平台布局引擎 [Yoga](https://github.com/facebook/yoga)  ，样式基本上是实现了 CSS 的一个子集，但是属性名不完全一致，具体的内容及相关差异可以查看文档 [React Native Layout Props](https://facebook.github.io/react-native/docs/layout-props)。Taro React Native 端样式文件的处理，主要可以分为以下几步：
 
 ![image](http://on-img.com/chart_image/5b8b8896e4b0d4d65bf1ddc7.png)
 

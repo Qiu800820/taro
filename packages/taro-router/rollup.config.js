@@ -1,30 +1,35 @@
-const { join } = require('path')
-const resolve = require('rollup-plugin-node-resolve')
-const babel = require('rollup-plugin-babel')
-const postcss = require('rollup-plugin-postcss')
-const typescript = require('rollup-plugin-typescript')
+import { pipe, set } from 'lodash/fp'
+import { join } from 'path'
+import babel from 'rollup-plugin-babel'
+import commonjs from 'rollup-plugin-commonjs'
+import resolve from 'rollup-plugin-node-resolve'
+import typescript from 'rollup-plugin-typescript'
 
 const cwd = __dirname
 
+const entries = [{
+  output: 'dist/index.js',
+  format: 'cjs'
+}, {
+  output: 'dist/index.esm.js',
+  format: 'esm'
+}]
+
 const baseConfig = {
-  input: join(cwd, 'src/index.tsx'),
+  input: 'src/index.tsx',
   external: ['nervjs', '@tarojs/taro-h5'],
-  output: [{
-    file: join(cwd, 'dist/index.js'),
-    format: 'cjs',
+  output: {
     sourcemap: false,
     exports: 'named'
-  }],
+  },
   plugins: [
-    typescript(),
-    postcss({
-      extensions: [ '.css' ]
-    }),
     resolve({
       preferBuiltins: false
     }),
+    typescript(),
     babel({
       babelrc: false,
+      extensions: ['.ts', '.tsx', '.es6', '.es', '.mjs'],
       presets: [
         ['@babel/preset-env', {
           modules: false
@@ -33,26 +38,25 @@ const baseConfig = {
       plugins: [
         '@babel/plugin-proposal-class-properties',
         '@babel/plugin-proposal-object-rest-spread',
+        '@babel/plugin-syntax-dynamic-import',
         ['@babel/plugin-transform-react-jsx', {
           'pragma': 'Nerv.createElement'
         }]
       ]
-    })
+    }),
+    commonjs()
   ],
   watch: {
     include: 'src/**',
     clearScreen: true
   }
 }
-const esmConfig = Object.assign({}, baseConfig, {
-  output: Object.assign({}, baseConfig.output, {
-    sourcemap: false,
-    format: 'es',
-    file: join(cwd, 'dist/index.esm.js')
-  })
-})
 
-function rollup () {
-  return [baseConfig, esmConfig]
+const appendConfigs = ({output, format}) => {
+  return pipe(
+    set('output.file', join(cwd, output)),
+    set('output.format', format)
+  )(baseConfig)
 }
-module.exports = rollup()
+
+export default entries.map(appendConfigs)
